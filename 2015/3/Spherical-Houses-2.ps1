@@ -1,42 +1,32 @@
 [CmdletBinding()]
 
 $list = (Get-Content input.txt).toCharArray()
-$houses = @()
+$script:houses = @()
 $current_santa = "0,0"
 $current_robo = "0,0"
-$houses += "0,0"
-# for $i +2 ?
+$script:houses += "0,0"
+
+function move_santa($loc,$move)
+{
+    [int[]]$coords = $loc -split ','
+    switch($move)
+    {
+        "<" { $coords[0]-- }
+        ">" { $coords[0]++ }
+        "^" { $coords[1]++ }
+        "v" { $coords[1]-- }
+    }
+    $new_loc = $coords -join ','
+    if($script:houses -notcontains $new_loc)
+    {
+        $script:houses += $new_loc
+    }
+    return $new_loc
+}
+
 for($i = 0; $i -lt $list.count; $i += 2)
 {
-    [int[]]$coords_santa = $current_santa -split ','
-    # Could make this part into a function called twice.
-    switch($list[$i])
-    {
-        "<" { $coords_santa[0]-- }
-        ">" { $coords_santa[0]++ }
-        "^" { $coords_santa[1]++ }
-        "v" { $coords_santa[1]-- }
-    }
-    $new_loc_santa = $coords_santa -join ','
-    if($houses -notcontains  $new_loc_santa)
-    {
-        $houses += $new_loc_santa
-    }
-    $current_santa = $new_loc_santa
-
-    [int[]]$coords_robo = $current_robo -split ','
-    switch($list[$i+1])
-    {
-        "<" { $coords_robo[0]-- }
-        ">" { $coords_robo[0]++ }
-        "^" { $coords_robo[1]++ }
-        "v" { $coords_robo[1]-- }
-    }
-    $new_loc_robo = $coords_robo -join ','
-    if($houses -notcontains  $new_loc_robo)
-    {
-        $houses += $new_loc_robo
-    }
-    $current_robo = $new_loc_robo
+    $current_santa = move_santa $current_santa $list[$i]
+    $current_robo = move_santa $current_robo $list[$i+1]
 }
-$houses.count
+$script:houses.count
